@@ -20,6 +20,7 @@ import cc.protea.spreedly.model.internal.SpreedlyTransactionListResponse;
 public class Spreedly {
 
 	private final SpreedlyUtil util;
+	private final String apiBaseUrl = "https://core.spreedly.com/v1/";
 
 	public Spreedly(final String environmentKey, final String apiSecret) {
 		util = new SpreedlyUtil(environmentKey, apiSecret);
@@ -32,7 +33,7 @@ public class Spreedly {
 	 * add that type of gateway to an environment.
 	 */
 	public List<SpreedlyGatewayProvider> listGatewayProviders() {
-		SpreedlyGatewayProviderResponse response = util.options("https://core.spreedly.com/v1/gateways.xml", SpreedlyGatewayProviderResponse.class);
+		SpreedlyGatewayProviderResponse response = util.options(apiBaseUrl + "gateways.xml", SpreedlyGatewayProviderResponse.class);
 		return response.gateways;
 	}
 
@@ -74,7 +75,7 @@ public class Spreedly {
 	 * @param sinceToken the last token received in the previous list
 	 */
 	public List<SpreedlyGatewayAccount> listGatewayAccounts(final String sinceToken) {
-		String url = "https://core.spreedly.com/v1/gateways.xml" + sinceToken == null ? "" : ("?since_token=" + sinceToken.trim());
+		String url = apiBaseUrl + "gateways.xml" + sinceToken == null ? "" : ("?since_token=" + sinceToken.trim());
 		SpreedlyGatewayAccountResponse response = util.get(url, SpreedlyGatewayAccountResponse.class);
 		return response.gateways;
 	}
@@ -83,7 +84,7 @@ public class Spreedly {
 	 * Retrieve a single gateway account.
 	 */
 	public SpreedlyGatewayAccount getGatewayAccount(final String token) {
-		return util.get("https://core.spreedly.com/v1/gateways/" + token + ".xml", SpreedlyGatewayAccount.class);
+		return util.get(apiBaseUrl + "gateways/" + token + ".xml", SpreedlyGatewayAccount.class);
 	}
 
 	/**
@@ -91,7 +92,7 @@ public class Spreedly {
 	 */
 	public SpreedlyGatewayAccount update(final SpreedlyGatewayAccount account) {
 		SpreedlyGatewayAccountUpdate simple = new SpreedlyGatewayAccountUpdate(account);
-		return util.put("https://core.spreedly.com/v1/gateways/" + account.token + ".xml", simple, SpreedlyGatewayAccount.class);
+		return util.put(apiBaseUrl + "gateways/" + account.token + ".xml", simple, SpreedlyGatewayAccount.class);
 	}
 
 	/**
@@ -101,7 +102,7 @@ public class Spreedly {
 	 */
 	public SpreedlyGatewayAccount create(final SpreedlyGatewayAccount account) {
 		SpreedlyGatewayAccountUpdate simple = new SpreedlyGatewayAccountUpdate(account);
-		return util.post("https://core.spreedly.com/v1/gateways.xml", simple, SpreedlyGatewayAccount.class);
+		return util.post(apiBaseUrl + "gateways.xml", simple, SpreedlyGatewayAccount.class);
 	}
 
 	/**
@@ -109,7 +110,7 @@ public class Spreedly {
 	 * information in them can be redacted so that they're inactive.
 	 */
 	public SpreedlyGatewayAccount redact(final SpreedlyGatewayAccount account) {
-		return util.put("https://core.spreedly.com/v1/gateways/" + account.token + "/redact.xml", null, SpreedlyGatewayAccount.class);
+		return util.put(apiBaseUrl + "gateways/" + account.token + "/redact.xml", null, SpreedlyGatewayAccount.class);
 	}
 
 	/**
@@ -119,17 +120,17 @@ public class Spreedly {
 	 * it, it cannot be used and you will not be billed for it.
 	 */
 	public SpreedlyGatewayAccount retain(final SpreedlyGatewayAccount account) {
-		return util.put("https://core.spreedly.com/v1/gateways/" + account.token + "/retain.xml", null, SpreedlyGatewayAccount.class);
+		return util.put(apiBaseUrl + "gateways/" + account.token + "/retain.xml", null, SpreedlyGatewayAccount.class);
 	}
 
 	// Transactions
 
 	private SpreedlyTransactionResponse gatewayPost(final SpreedlyTransactionRequest request, final String url) {
-		return util.post("https://core.spreedly.com/v1/gateways/" + request.gatewayAccountToken + "/" + url, request, SpreedlyTransactionResponse.class);
+		return util.post(apiBaseUrl + "gateways/" + request.gatewayAccountToken + "/" + url, request, SpreedlyTransactionResponse.class);
 	}
 
 	private SpreedlyTransactionResponse transactionPost(final SpreedlyTransactionRequest request, final String url) {
-		return util.post("https://core.spreedly.com/v1/transactions/" + request.referenceTransactionToken + "/" + url, request, SpreedlyTransactionResponse.class);
+		return util.post(apiBaseUrl + "transactions/" + request.referenceTransactionToken + "/" + url, request, SpreedlyTransactionResponse.class);
 	}
 
 	/**
@@ -176,7 +177,7 @@ public class Spreedly {
 	 * @param desc if true, reverse the order to retrieve the most recent first
 	 */
 	public List<SpreedlyTransactionResponse> listGatewayAccountTransactions(final String gatewayAccountToken, final String sinceToken, final boolean desc) {
-		String url = "https://core.spreedly.com/v1/gateways/" + gatewayAccountToken + "/transactions.xml?order=" +
+		String url = apiBaseUrl + "gateways/" + gatewayAccountToken + "/transactions.xml?order=" +
 				(desc ? "desc" : "asc") +
 				(sinceToken == null ? "" : "&since_token = " + sinceToken.trim());
 		SpreedlyTransactionListResponse r = util.get(url, SpreedlyTransactionListResponse.class);
@@ -212,7 +213,7 @@ public class Spreedly {
 	 * @param desc if true, reverse the order to retrieve the most recent first
 	 */
 	public List<SpreedlyTransactionResponse> listTransactions(final String sinceToken, final boolean desc) {
-		String url = "https://core.spreedly.com/v1/transactions.xml?order=" +
+		String url = apiBaseUrl + "transactions.xml?order=" +
 				(desc ? "desc" : "asc") +
 				(sinceToken == null ? "" : "&since_token = " + sinceToken.trim());
 		SpreedlyTransactionListResponse r = util.get(url, SpreedlyTransactionListResponse.class);
@@ -234,14 +235,14 @@ public class Spreedly {
 	 * Retrieve a single transaction.
 	 */
 	public SpreedlyTransactionResponse getTransaction(final String token) {
-		return util.get("https://core.spreedly.com/v1/transactions/" + token + ".xml", SpreedlyTransactionResponse.class);
+		return util.get(apiBaseUrl + "transactions/" + token + ".xml", SpreedlyTransactionResponse.class);
 	}
 
 	/**
 	 * Retrieve the transcript for a single transaction.
 	 */
 	public String getTranscript(final String token) {
-		return util.get("https://core.spreedly.com/v1/transactions/" + token + "/transcript", String.class);
+		return util.get(apiBaseUrl + "transactions/" + token + "/transcript", String.class);
 	}
 
 	/**
@@ -264,7 +265,7 @@ public class Spreedly {
 		request.creditCard = creditCard;
 		request.data = creditCard.data;
 		request.email = creditCard.email;
-		return util.post("https://core.spreedly.com/v1/payment_methods.xml", request, SpreedlyTransactionResponse.class);
+		return util.post(apiBaseUrl + "payment_methods.xml", request, SpreedlyTransactionResponse.class);
 	}
 
 	/**
@@ -273,7 +274,7 @@ public class Spreedly {
 	 * @param sinceToken the last token received in the previous list
 	 */
 	public List<SpreedlyPaymentMethod> listPaymentMethods(final String sinceToken, final boolean desc) {
-		String url = "https://core.spreedly.com/v1/payment_methods.xml?order=" +
+		String url = apiBaseUrl + "payment_methods.xml?order=" +
 				(desc ? "desc" : "asc") +
 				(sinceToken == null ? "" : "&since_token = " + sinceToken.trim());
 		SpreedlyPaymentMethodListResponse r = util.get(url, SpreedlyPaymentMethodListResponse.class);
@@ -302,7 +303,7 @@ public class Spreedly {
 	 * for credit cards), and any already vaulted data will be ignored.
 	 */
 	public SpreedlyTransactionResponse recache(final SpreedlyPaymentMethod paymentMethod) {
-		return util.post("https://core.spreedly.com/v1/payment_methods/" + paymentMethod.token + "/recache.xml", paymentMethod, SpreedlyTransactionResponse.class);
+		return util.post(apiBaseUrl + "payment_methods/" + paymentMethod.token + "/recache.xml", paymentMethod, SpreedlyTransactionResponse.class);
 	}
 
 	/**
@@ -324,7 +325,7 @@ public class Spreedly {
 			request = new SpreedlyPaymentMethodUpdate();
 			request.gatewayAccountToken = gatewayAccountToken;
 		}
-		return util.put("https://core.spreedly.com/v1/payment_methods/" + paymentMethodToken + "/redact.xml", request, SpreedlyTransactionResponse.class);
+		return util.put(apiBaseUrl + "payment_methods/" + paymentMethodToken + "/redact.xml", request, SpreedlyTransactionResponse.class);
 	}
 
 	/**
@@ -347,14 +348,14 @@ public class Spreedly {
 	 * </p>
 	 */
 	public SpreedlyTransactionResponse retain(final String paymentMethodToken) {
-		return util.put("https://core.spreedly.com/v1/payment_methods/" + paymentMethodToken + "/retain.xml", null, SpreedlyTransactionResponse.class);
+		return util.put(apiBaseUrl + "payment_methods/" + paymentMethodToken + "/retain.xml", null, SpreedlyTransactionResponse.class);
 	}
 
 	/**
 	 * Retrieve a single payment method by supplying the payment method key.
 	 */
 	public SpreedlyPaymentMethod getPaymentMethod(final String paymentMethodToken) {
-		return util.get("https://core.spreedly.com/v1/payment_methods/" + paymentMethodToken + "/retain.xml", SpreedlyPaymentMethod.class);
+		return util.get(apiBaseUrl + "payment_methods/" + paymentMethodToken + "/retain.xml", SpreedlyPaymentMethod.class);
 	}
 
 	/**
@@ -363,7 +364,7 @@ public class Spreedly {
 	 * @param desc if true, reverse the order to retrieve the most recent first
 	 */
 	public List<SpreedlyTransactionResponse> listPaymentMethodTransactions(final String paymentMethodToken, final String sinceToken, final boolean desc) {
-		String url = "https://core.spreedly.com/v1/payment_methods/" + paymentMethodToken + "/transactions.xml?order=" +
+		String url = apiBaseUrl + "payment_methods/" + paymentMethodToken + "/transactions.xml?order=" +
 				(desc ? "desc" : "asc") +
 				(sinceToken == null ? "" : "&since_token = " + sinceToken.trim());
 		SpreedlyTransactionListResponse r = util.get(url, SpreedlyTransactionListResponse.class);
@@ -382,7 +383,7 @@ public class Spreedly {
 	 * </p>
 	 */
 	public SpreedlyTransactionResponse update(final SpreedlyPaymentMethod paymentMethod) {
-		return util.put("https://core.spreedly.com/v1/payment_methods/" + paymentMethod.token + ".xml", paymentMethod, SpreedlyTransactionResponse.class);
+		return util.put(apiBaseUrl + "payment_methods/" + paymentMethod.token + ".xml", paymentMethod, SpreedlyTransactionResponse.class);
 	}
 
 }
