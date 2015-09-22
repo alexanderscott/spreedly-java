@@ -2,20 +2,40 @@ package cc.protea.spreedly;
 
 import java.util.List;
 
-import cc.protea.spreedly.model.SpreedlyGatewayAccount;
-import cc.protea.spreedly.model.SpreedlyGatewayAccountState;
-import cc.protea.spreedly.model.SpreedlyGatewayCredential;
+import cc.protea.spreedly.model.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import cc.protea.spreedly.model.SpreedlyGatewayProvider;
 
 
 public class SpreedlyTest {
 
 	Spreedly spreedly;
 	SpreedlyGatewayAccount testAccount;
+
+	private SpreedlyGatewayAccount createTestGatewayAccount() {
+		SpreedlyGatewayAccount account = new SpreedlyGatewayAccount();
+		account.gatewayType = "test";
+		SpreedlyGatewayCredential c = new SpreedlyGatewayCredential();
+		c.name = "merchant_id_number";
+		c.value = "12345";
+		account.credentials.add(c);
+		spreedly.create(account);
+	}
+
+	private SpreedlyCreditCard testSpreedlyCreditCard() {
+		SpreedlyCreditCard card = new SpreedlyCreditCard();
+		card.setCardType(SpreedlyCardType.VISA);
+		card.setNumber("4111111111111111");
+		card.setEmail("testEmail@test.com");
+		card.setData("testCardData");
+		card.setMonth(11);
+		card.setYear(2018);
+		card.setFirstName("Joe");
+		card.setLastName("Johnson");
+		card.setVerificationValue("123");
+		return card;
+	}
 
 	@Before
 	public void before() {
@@ -33,7 +53,7 @@ public class SpreedlyTest {
     }
 
 	@Test
-	public void testCreate() throws Exception {
+	public void testCreateGatewayAccount() throws Exception {
 		if (spreedly == null) {
 			return;
 		}
@@ -56,7 +76,7 @@ public class SpreedlyTest {
 	}
 
 	@Test
-	public void testRedact() throws Exception {
+	public void testRedactGatewayAccount() throws Exception {
 		if (spreedly == null) {
 			return;
 		}
@@ -66,7 +86,7 @@ public class SpreedlyTest {
 	}
 
 	@Test
-	public void testRetain() throws Exception {
+	public void testRetainGatewayAccount() throws Exception {
 		if (spreedly == null) {
 			return;
 		}
@@ -82,6 +102,19 @@ public class SpreedlyTest {
 		final List<SpreedlyGatewayAccount> list = spreedly.listGatewayAccounts();
 		Assert.assertNotNull(list);
 		Assert.assertTrue(! list.isEmpty());
+	}
+
+	@Test
+	public void testCreatePaymentMethod() throws Exception {
+		if (spreedly == null) {
+			return;
+		}
+
+		SpreedlyTransactionResponse createPaymentMethodResponse = spreedly.create(testSpreedlyCreditCard());
+		Assert.assertTrue(createPaymentMethodResponse.isSucceeded());
+		Assert.assertTrue(createPaymentMethodResponse.getPaymentMethod().getPaymentMethodType() == SpreedlyPaymentMethodType.CREDIT_CARD);
+		Assert.assertTrue(createPaymentMethodResponse.getPaymentMethod().getCardType() == SpreedlyCardType.VISA);
+		Assert.assertTrue(createPaymentMethodResponse.getPaymentMethod().getStorageState() == SpreedlyStorageState.CACHED);
 	}
 
     public static Spreedly getSpreedly() {
