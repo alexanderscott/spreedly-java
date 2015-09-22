@@ -20,7 +20,7 @@ public class SpreedlyTest {
 		c.name = "merchant_id_number";
 		c.value = "12345";
 		account.credentials.add(c);
-		spreedly.create(account);
+		return spreedly.create(account);
 	}
 
 	private SpreedlyCreditCard testSpreedlyCreditCard() {
@@ -35,6 +35,10 @@ public class SpreedlyTest {
 		card.setLastName("Johnson");
 		card.setVerificationValue("123");
 		return card;
+	}
+
+	private SpreedlyPaymentMethod createTestPaymentMethod() {
+		return spreedly.create(testSpreedlyCreditCard()).getPaymentMethod();
 	}
 
 	@Before
@@ -115,6 +119,19 @@ public class SpreedlyTest {
 		Assert.assertTrue(createPaymentMethodResponse.getPaymentMethod().getPaymentMethodType() == SpreedlyPaymentMethodType.CREDIT_CARD);
 		Assert.assertTrue(createPaymentMethodResponse.getPaymentMethod().getCardType() == SpreedlyCardType.VISA);
 		Assert.assertTrue(createPaymentMethodResponse.getPaymentMethod().getStorageState() == SpreedlyStorageState.CACHED);
+	}
+
+	@Test
+	public void testGetPaymentMethods() throws Exception {
+		if (spreedly == null) {
+			return;
+		}
+
+		SpreedlyPaymentMethod created = createTestPaymentMethod();
+		SpreedlyPaymentMethod foundPaymentMethod = spreedly.getPaymentMethod(created.getToken());
+		Assert.assertTrue(foundPaymentMethod.getPaymentMethodType() == SpreedlyPaymentMethodType.CREDIT_CARD);
+		Assert.assertTrue(foundPaymentMethod.getCardType() == SpreedlyCardType.VISA);
+		Assert.assertTrue(foundPaymentMethod.getStorageState() == SpreedlyStorageState.CACHED);
 	}
 
     public static Spreedly getSpreedly() {
